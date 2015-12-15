@@ -221,3 +221,5 @@ __pthread_mutex_destroy (mutex)
   return 0;
 }
 ```
+
+整理来自：[Reference](http://blog.csdn.net/livelylittlefish/article/details/8096595)
