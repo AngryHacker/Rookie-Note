@@ -73,7 +73,7 @@
 
 线程状态转换如下图。
 
-![thread](http://img.my.csdn.net/uploads/201209/07/1347032132_4377.png)
+![thread](https://github.com/AngryHacker/ocean/blob/master/creative/image/thread_status.png)
 
 #### 说明
 
