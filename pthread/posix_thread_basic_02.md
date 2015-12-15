@@ -144,3 +144,4 @@
 * 一旦线程被回收，线程ID就无效了，不能再连接、取消或者执行其他任何操作
  * 终止线程ID可能被分给新线程
 
+整理来自：[Reference](http://blog.csdn.net/livelylittlefish/article/details/8096595)
