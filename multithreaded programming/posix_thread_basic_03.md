@@ -11,7 +11,7 @@
 ### 互斥量的例子
 下图显示了共享互斥量的三个线程的时序图。
 
-![lock](https://github.com/AngryHacker/ocean/blob/master/creative/image/thread_lock.jpg)
+![lock](https://github.com/AngryHacker/ocean/blob/master/creative/image/thread_lock.png)
 
 #### 说明
 * 处于标圆形框之上的线段表示相关的线程没有拥有互斥量
