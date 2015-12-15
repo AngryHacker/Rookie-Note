@@ -30,8 +30,12 @@
 * 在POSIX中，并发的定义要求“延迟调用线程的函数不应该导致其他线程的无限期延迟”
 * 并发操作之间可能任意交错，导致程序相互独立的运行(一个程序不必等到另一个程序结束后才开始运行)，但并发并不代表操作同时进行
 
+![并发][concurrency]
+
 #### 并发 vs 并行
 并发：指并发序列同时执行。指事情在相同的方向上独立进行(没有交错)。
+
+![并行][parallelism]
 
 * 真正的并行只能在多处理器系统中存在
 * 但并发可以在单处理器系统和多处理器系统中都存在
@@ -101,3 +105,6 @@ pthreads 互斥量、条件变量、线程私有数据
 * 一旦避免了冲突，条件变量让线程等待直到可以安全地执行
 
 整理：[Reference](http://blog.csdn.net/livelylittlefish/article/details/7918110)
+
+[concurrency]: https://github.com/AngryHacker/ocean/blob/master/creative/image/concurrency.jpg
+[parallelism]: https://github.com/AngryHacker/ocean/blob/master/creative/image/parallelism.jpg
