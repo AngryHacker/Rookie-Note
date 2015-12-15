@@ -104,7 +104,7 @@ pthreads 互斥量、条件变量、线程私有数据
 * 互斥量阻止线程间发生不可预期的冲突
 * 一旦避免了冲突，条件变量让线程等待直到可以安全地执行
 
-整理：[Reference](http://blog.csdn.net/livelylittlefish/article/details/7918110)
+整理来自：[Reference](http://blog.csdn.net/livelylittlefish/article/details/7918110)
 
 [concurrency]: https://github.com/AngryHacker/ocean/blob/master/creative/image/concurrency.jpg
 [parallelism]: https://github.com/AngryHacker/ocean/blob/master/creative/image/parallelism.jpg
