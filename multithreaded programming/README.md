@@ -8,4 +8,6 @@
 
 [POSIX 多线程 API](https://github.com/AngryHacker/ocean/blob/master/multithreaded%20programming/pthread_api.md)
 
+[POSIX 多线程互斥锁](https://github.com/AngryHacker/ocean/blob/master/multithreaded%20programming/pthread_mutex_basic.md)
+
 [POSIX 多线程编程实例](https://github.com/AngryHacker/ocean/blob/master/multithreaded%20programming/pthread_examples.md)
