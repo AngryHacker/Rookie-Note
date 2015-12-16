@@ -156,3 +156,190 @@ counter(main): 7
 counter(main): 8
 counter(main): 9
 ```
+### 线程私有数据（TSD）
+#### 参考源码
+
+```c
+/**
+ * 线程中特有的线程存储， Thread Specific Data 。在多线程程序中，所有线程共享程序中的全局变量。
+ * 现在有一全局变量，所有线程都可以使用它，改变它的值。而如果每个线程希望能单独拥有它，
+ * 那么就需要使用线程存储了。表面上看起来这是一个全局变量，所有线程都可以使用它，
+ * 而它的值在每一个线程中又是单独存储的。这就是线程存储的意义。
+ *
+ * 下面说一下线程存储的具体用法。
+ *
+ *   创建一个类型为 pthread_key_t 类型的变量。
+ *
+ *   调用 pthread_key_create() 来创建该变量。该函数有两个参数，
+ *   第一个参数就是上面声明的 pthread_key_t 变量，第二个参数是一个清理函数，用来在线程释放该线程存储的时候被调用。
+ *   该函数指针可以设成 NULL ，这样系统将调用默认的清理函数。
+ *
+ *   当线程中需要存储特殊值的时候，可以调用 pthread_setspcific() 。该函数有两个参数，
+ *   第一个为前面声明的 pthread_key_t 变量，第二个为 void* 变量，这样你可以存储任何类型的值。
+ *
+ *   如果需要取出所存储的值，调用 pthread_getspecific() 。
+ *   该函数的参数为前面提到的 pthread_key_t 变量，该函数返回 void * 类型的值。
+ *
+ * 下面是前面提到的函数的原型：
+ *
+ * int pthread_setspecific(pthread_key_t key, const void *value);
+ *
+ * void *pthread_getspecific(pthread_key_t key);
+ *
+ * int pthread_key_create(pthread_key_t *key, void (*destructor)(void*));
+ */
+
+#include <stdio.h>
+#include <pthread.h>
+#include <unistd.h>
+
+pthread_key_t key; /* 声明参数key */
+
+void echomsg(void *arg) /* 析构处理函数 */
+{
+    printf("destruct executed in thread = %u, arg = %p\n",
+            (unsigned int)pthread_self(),
+            arg);
+}
+
+void *child_1(void *arg)
+{
+    pthread_t tid;
+
+    tid = pthread_self();
+    printf("%s: thread %u enter\n", (char *)arg, (unsigned int)tid);
+
+    pthread_setspecific(key, (void *)tid);  /* 与key值绑定的value(tid) */
+    printf("%s: thread %u returns %p\n",    /* %p 表示输出指针格式  */
+            (char *)arg,
+            (unsigned int)tid,
+            pthread_getspecific(key));  /* 获取key值的value */
+    sleep(1);
+    return NULL;
+}
+
+void *child_2(void *arg)
+{
+    pthread_t tid;
+
+    tid = pthread_self();
+    printf("%s: thread %u enter\n", (char *)arg, (unsigned int)tid);
+
+    pthread_setspecific(key, (void *)tid);
+    printf("%s: thread %u returns %p\n",
+            (char *)arg,
+            (unsigned int)tid,
+            pthread_getspecific(key));
+    sleep(1);
+    return NULL;
+}
+
+int main(void)
+{
+    pthread_t tid1, tid2;
+
+    printf("hello main\n");
+
+    pthread_key_create(&key, echomsg); /* 创建key */
+
+    pthread_create(&tid1, NULL, child_1, (void *)"child_1"); /* 创建带参数的线程，需要强制转换 */
+    pthread_create(&tid2, NULL, child_2, (void *)"child_2");
+
+    sleep(3);
+    pthread_key_delete(key); /* 清除key */
+    printf("bye main\n");
+
+    pthread_exit(0);
+    return 0;
+}
+```
+
+#### 运行结果
+
+```
+➜  pthread  gcc -Wall -pthread -o pthread_setspecific pthread_setspecific.c 
+➜  pthread  ./pthread_setspecific 
+hello main
+child_2: thread 4238526208 enter
+child_2: thread 4238526208 returns 0x7fdafca2c700
+child_1: thread 4246918912 enter
+child_1: thread 4246918912 returns 0x7fdafd22d700
+destruct executed in thread = 4238526208, arg = 0x7fdafca2c700
+destruct executed in thread = 4246918912, arg = 0x7fdafd22d700
+bye main
+```
+
+### `pthread_once`
+#### 参考源码
+
+```c
+#include <stdio.h>
+#include <pthread.h>
+#include <unistd.h>
+
+pthread_once_t once = PTHREAD_ONCE_INIT; /* 声明变量。控制变量必须使用 PTHREAD_ONCE_INIT 宏静态地初始化 */
+
+/**
+ * once_run()函数仅执行一次，且究竟在哪个线程中执行是不定的
+ * 尽管pthread_once(&once,once_run)出现在两个线程中
+ * 函数原型：int pthread_once(pthread_once_t *once_control, void (*init_routine)(void))
+ */
+void once_run(void)
+{
+    printf("Func: %s in thread: %u\n",
+            __func__,
+            (unsigned int)pthread_self());
+}
+
+void *child_1(void *arg)
+{
+    pthread_t tid;
+
+    tid = pthread_self();
+    pthread_once(&once, once_run); /* 调用once_run */
+    printf("%s: thread %d returns\n", (char *)arg, (unsigned int)tid);
+
+    return NULL;
+}
+
+void *child_2(void *arg)
+{
+    pthread_t tid;
+
+    tid = pthread_self();
+    pthread_once(&once, once_run); /* 调用once_run */
+    printf("%s: thread %d returns\n", (char *)arg, (unsigned int)tid);
+
+    return NULL;
+}
+
+int main(void)
+{
+    pthread_t tid1, tid2;
+
+    printf("hello main\n");
+    pthread_create(&tid1, NULL, child_1, (void *)"child_1");
+    pthread_create(&tid2, NULL, child_2, (void *)"child_2");
+
+    pthread_join(tid1, NULL);  /* main主线程等待线程 tid1 返回 */
+    pthread_join(tid2, NULL);  /* main主线程等待线程 tid2 返回 */
+    printf("bye main\n");
+
+    return 0;
+}
+```
+
+#### 运行结果
+
+```
+➜  pthread  gcc -Wall -pthread -o pthread_once pthread_once.c
+➜  pthread  ./pthread_once                                 
+hello main
+Func: once_run in thread: 861472512
+child_2: thread 861472512 returns
+child_1: thread 869865216 returns
+bye main
+```
+
+整理来自：[Reference1](http://blog.csdn.net/sunboy_2050/article/details/6063067) [Reference2](http://www.cnblogs.com/yuxingfirst/archive/2012/07/25/2608612.html)
+（注：整理过程不同程度修改了代码，全部已在 gcc 5.2.1 编译通过）
