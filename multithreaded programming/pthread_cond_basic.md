@@ -123,4 +123,91 @@ int pthread_cond_destroy(pthread_cond_t *cv);
 * 另一个线程正处在测试条件变量和调用 `pthread_cond_wait` 函数之间；
 * 没有线程正在处在阻塞等待的状态下。
 
-整理来自：[Reference](http://blog.csdn.net/icechenbing/article/details/7662026)
+### 例子
+
+#### 示例 1
+
+```c
+#include <stdio.h>
+#include <pthread.h>
+
+#define TCOUNT 10
+#define WATCH_COUNT 12
+
+int count = 0;
+pthread_mutex_t count_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t count_threshold_cv = PTHREAD_COND_INITIALIZER;
+int  thread_ids[3] = {0,1,2};
+void* inc_count(void*);
+void* watch_count(void*);
+
+extern int
+main(void)
+{
+    int      i;
+    pthread_t threads[3];
+    pthread_create(&threads[0],NULL,inc_count, &thread_ids[0]);
+    pthread_create(&threads[1],NULL,inc_count, &thread_ids[1]);
+    pthread_create(&threads[2],NULL,watch_count, &thread_ids[2]);
+    for (i = 0; i < 3; i++) {
+        pthread_join(threads[i], NULL);
+    }
+    return 0;
+}
+
+void* watch_count(void *idp) {
+    pthread_mutex_lock(&count_mutex);
+    while (count < WATCH_COUNT) {
+        pthread_cond_wait(&count_threshold_cv,
+                &count_mutex);
+        printf("watch_count(): Thread %d,Count is %d\n",
+                *(int*)idp, count);
+    }
+    pthread_mutex_unlock(&count_mutex);
+    return 0;
+}
+
+void* inc_count(void *idp) {
+    int i;
+    for (i =0; i < TCOUNT; i++) {
+        pthread_mutex_lock(&count_mutex);
+        count++;
+        printf("inc_count(): Thread %d, old count %d, new count %d\n",
+                *(int*)idp, count - 1, count );
+        if (count == WATCH_COUNT)
+            pthread_cond_signal(&count_threshold_cv);
+        pthread_mutex_unlock(&count_mutex);
+    }
+    return 0;
+}
+```
+
+#####  运行结果
+
+```
+➜  pthread  gcc -Wall -pthread -o pthread_cond1 pthread_cond1.c
+➜  pthread  ./pthread_cond1                                    
+inc_count(): Thread 1, old count 0, new count 1
+inc_count(): Thread 1, old count 1, new count 2
+inc_count(): Thread 1, old count 2, new count 3
+inc_count(): Thread 1, old count 3, new count 4
+inc_count(): Thread 1, old count 4, new count 5
+inc_count(): Thread 1, old count 5, new count 6
+inc_count(): Thread 1, old count 6, new count 7
+inc_count(): Thread 1, old count 7, new count 8
+inc_count(): Thread 1, old count 8, new count 9
+inc_count(): Thread 1, old count 9, new count 10
+inc_count(): Thread 0, old count 10, new count 11
+inc_count(): Thread 0, old count 11, new count 12
+watch_count(): Thread 2,Count is 12
+inc_count(): Thread 0, old count 12, new count 13
+inc_count(): Thread 0, old count 13, new count 14
+inc_count(): Thread 0, old count 14, new count 15
+inc_count(): Thread 0, old count 15, new count 16
+inc_count(): Thread 0, old count 16, new count 17
+inc_count(): Thread 0, old count 17, new count 18
+inc_count(): Thread 0, old count 18, new count 19
+inc_count(): Thread 0, old count 19, new count 20
+```
+整理来自：[Reference1](http://blog.csdn.net/icechenbing/article/details/7662026)
+          [Reference2](http://maxim.int.ru/bookshelf/PthreadsProgram/htm/r_28.html)
