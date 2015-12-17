@@ -209,5 +209,102 @@ inc_count(): Thread 0, old count 17, new count 18
 inc_count(): Thread 0, old count 18, new count 19
 inc_count(): Thread 0, old count 19, new count 20
 ```
+##### 示例 2
+
+```c
+/* 这个例子是为了保证 COUNT_HALT1 到 COUNT_HALT2 的加法由 functionCount2 来完成，但我加了两个 sleep 就全变了...*/
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <unistd.h>
+
+pthread_mutex_t count_mutex     = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t condition_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t  condition_cond  = PTHREAD_COND_INITIALIZER;
+
+void *functionCount1();
+void *functionCount2();
+int  count = 0;
+#define COUNT_DONE  10
+#define COUNT_HALT1  3
+#define COUNT_HALT2  6
+
+int main()
+{
+   pthread_t thread1, thread2;
+
+   pthread_create( &thread1, NULL, &functionCount1, NULL);
+   pthread_create( &thread2, NULL, &functionCount2, NULL);
+   pthread_join( thread1, NULL);
+   pthread_join( thread2, NULL);
+
+   exit(0);
+}
+
+void *functionCount1()
+{
+   for(;;)
+   {
+       pthread_mutex_lock( &condition_mutex );
+       while( count >= COUNT_HALT1 && count <= COUNT_HALT2 )
+       {
+           pthread_cond_wait( &condition_cond, &condition_mutex );
+       }
+       pthread_mutex_unlock( &condition_mutex );
+
+       //sleep(1);
+
+       pthread_mutex_lock( &count_mutex );
+       count++;
+       printf("Counter value functionCount1: %d\n",count);
+       pthread_mutex_unlock( &count_mutex );
+
+       if(count >= COUNT_DONE) return(NULL);
+   }
+}
+
+void *functionCount2()
+{
+    for(;;)
+    {
+       pthread_mutex_lock( &condition_mutex );
+       if( count < COUNT_HALT1 || count > COUNT_HALT2 )
+       {
+          pthread_cond_signal( &condition_cond );
+       }
+       pthread_mutex_unlock( &condition_mutex );
+
+       //sleep(1);
+
+       pthread_mutex_lock( &count_mutex );
+       count++;
+       printf("Counter value functionCount2: %d\n",count);
+       pthread_mutex_unlock( &count_mutex );
+
+       if(count >= COUNT_DONE) return(NULL);
+    }
+
+}
+```
+
+##### 运行结果
+
+```
+➜  pthread  gcc -Wall -pthread -o pthread_cond2 pthread_cond2.c
+➜  pthread  ./pthread_cond2                                  
+Counter value functionCount2: 1
+Counter value functionCount2: 2
+Counter value functionCount2: 3
+Counter value functionCount2: 4
+Counter value functionCount2: 5
+Counter value functionCount2: 6
+Counter value functionCount2: 7
+Counter value functionCount2: 8
+Counter value functionCount2: 9
+Counter value functionCount2: 10
+Counter value functionCount1: 11
+```
+
 整理来自：[Reference1](http://blog.csdn.net/icechenbing/article/details/7662026)
           [Reference2](http://maxim.int.ru/bookshelf/PthreadsProgram/htm/r_28.html)
+          [Reference3](http://www.cs.cmu.edu/afs/cs/academic/class/15492-f07/www/pthreads.html#SYNCHRONIZATION)
