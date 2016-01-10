@@ -57,8 +57,9 @@ FIFO的打开规则：
 #include <limits.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
-#define FIFO_NAME "/tmp/Linux/my_fifo"
+#define FIFO_NAME "/tmp/my_fifo"
 #define BUFFER_SIZE PIPE_BUF
 #define TEN_MEG (1024 * 1024 * 10)
 
@@ -76,14 +77,14 @@ int main()
         res = mkfifo(FIFO_NAME, 0777);
         if (res != 0)
         {
-            fprintf(stderr, "Could not create fifo %s/n", FIFO_NAME);
+            fprintf(stderr, "Could not create fifo %s\n", FIFO_NAME);
             exit(EXIT_FAILURE);
         }
     }
 
-    printf("Process %d opening FIFO O_WRONLY/n", getpid());
+    printf("Process %d opening FIFO O_WRONLY\n", getpid());
     pipe_fd = open(FIFO_NAME, open_mode);
-    printf("Process %d result %d/n", getpid(), pipe_fd);
+    printf("Process %d open result: the fd is %d\n", getpid(), pipe_fd);
 
     if (pipe_fd != -1)
     {
@@ -92,7 +93,7 @@ int main()
             res = write(pipe_fd, buffer, BUFFER_SIZE);
             if (res == -1)
             {
-                fprintf(stderr, "Write error on pipe/n");
+                fprintf(stderr, "Write error on pipe\n");
                 exit(EXIT_FAILURE);
             }
             bytes += res;
@@ -104,7 +105,7 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    printf("Process %d finish/n", getpid());
+    printf("Process %d finish\n", getpid());
     exit(EXIT_SUCCESS);
 }
 ```
@@ -119,8 +120,9 @@ int main()
 #include <limits.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
-#define FIFO_NAME "/tmp/Linux/my_fifo"
+#define FIFO_NAME "/tmp/my_fifo"
 #define BUFFER_SIZE PIPE_BUF
 
 int main()
@@ -132,11 +134,11 @@ int main()
     char buffer[BUFFER_SIZE + 1];
     int bytes = 0;
 
-    memset(buffer, '/0', sizeof(buffer));
+    memset(buffer, '\0', sizeof(buffer));
 
-    printf("Process %d opeining FIFO O_RDONLY/n", getpid());
+    printf("Process %d opeining FIFO O_RDONLY\n", getpid());
     pipe_fd = open(FIFO_NAME, open_mode);
-    printf("Process %d result %d/n", getpid(), pipe_fd);
+    printf("Process %d open result: the fd is %d\n", getpid(), pipe_fd);
 
     if (pipe_fd != -1)
     {
@@ -151,9 +153,27 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    printf("Process %d finished, %d bytes read/n", getpid(), bytes);
+    printf("Process %d finished, %d bytes read\n", getpid(), bytes);
     exit(EXIT_SUCCESS);
 }
+```
+
+##### 运行结果
+
+```shell
+➜  unix  gcc -o produce fifo1.c
+➜  unix  gcc -o consume fifo2.c
+➜  unix  ./produce&  #进入后台运行
+[1] 7796
+Process 7796 opening FIFO O_WRONLY                                                                                                    
+➜  unix  time ./consume #用 time 统计运行时间
+Process 7805 opeining FIFO O_RDONLY
+Process 7805 open result: the fd is 3
+Process 7796 open result: the fd is 3
+Process 7796 finish
+Process 7805 finished, 10485760 bytes read
+[1]  + 7796 done       ./produce
+./consume  0.00s user 0.02s system 73% cpu 0.022 total
 ```
 
 ### 小结
@@ -166,3 +186,6 @@ int main()
 * FIFO 可以说是管道的推广，克服了管道无名字的限制，使得无亲缘关系的进程同样可以采用先进先出的通信机制进行通信。
 * 管道和 FIFO 的数据是字节流，应用程序之间必须事先确定特定的传输"协议"，采用传播具有特定意义的消息。
 * 要灵活应用管道及 FIFO，理解它们的读写规则是关键。
+
+整理来自：[Reference1](http://www.ibm.com/developerworks/cn/linux/l-ipc/part1/index.html#authorN10019)
+[Reference2](http://blog.csdn.net/MONKEY_D_MENG/article/details/5651430)
