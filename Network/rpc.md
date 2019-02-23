@@ -213,8 +213,12 @@ java 中实现代码的动态接口调用目前一般通过反射调用。除了
 
 整理来自：[Reference1](http://blog.csdn.net/mindfloating/article/details/39473807)
           [Reference2](http://blog.csdn.net/mindfloating/article/details/39474123)
+
+#### 扩展阅读
+[知乎 - 什么是RPC](https://www.zhihu.com/question/25536695)
           
 
 [rpc01]: https://github.com/AngryHacker/Rookie-Note/blob/master/creative/image/rpc01.png
 [rpc02]: https://github.com/AngryHacker/Rookie-Note/blob/master/creative/image/rpc02.png
 [rpc03]: https://github.com/AngryHacker/Rookie-Note/blob/master/creative/image/rpc03.png
+
