@@ -3,7 +3,7 @@
 KV 存储，非关系型（NoSQL）
 
 ### 存储量级
-在内存存储，存储数量不多，配置中的 maxmemory 控制使用的物理内存。单例能存储 Key 2.5亿个(https://redis.io/topics/faq)，一个key或是value大小最大是512M。
+在内存存储，存储数量不多，配置中的 maxmemory 控制使用的物理内存。单例能存储 Key 2.5亿个( https://redis.io/topics/faq )，一个key或是value大小最大是512M。
 
 容量评估：[Redis容量评估模型](https://cloud.tencent.com/developer/article/1004898)
 
