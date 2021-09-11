@@ -62,3 +62,8 @@ TCP 的头格式为：
 你可以看到，SeqNum的增加是和传输的字节数相关的。上图中，三次握手后，来了两个 Len:1440 的包，而第二个包的 SeqNum 就成了 1441。然后第一个 ACK 回的是1441，表示第一个 1440 收到了。
 
 注意：如果你用 Wireshark 抓包程序看3次握手，你会发现 SeqNum 总是为 0，不是这样的，Wireshark 为了显示更友好，使用了 Relative SeqNum——相对序号，你只要在右键菜单中的 protocol preference 中取消掉就可以看到 “Absolute SeqNum” 了
+
+## Refer
+整理自：
+* [TCP 的那些事儿（上）](https://coolshell.cn/articles/11564.html)
+* [TCP 的那些事儿（下](https://coolshell.cn/articles/11609.html)

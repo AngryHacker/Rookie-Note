@@ -120,3 +120,8 @@ DevRTT = (1-β)*DevRTT + β*(|RTT-SRTT|) ——计算平滑RTT和真实的差距
 RTO= µ * SRTT + ∂ *DevRTT —— 神一样的公式
 
 （其中：在Linux下，α = 0.125，β = 0.25， μ = 1，∂ = 4 ——这就是算法中的“调得一手好参数”，nobody knows why, it just works…） 最后的这个算法在被用在今天的TCP协议中（Linux的源代码在：tcp_rtt_estimator）。
+
+## Refer
+整理自：
+* [TCP 的那些事儿（上）](https://coolshell.cn/articles/11564.html)
+* [TCP 的那些事儿（下](https://coolshell.cn/articles/11609.html)

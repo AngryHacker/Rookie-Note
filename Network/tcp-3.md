@@ -61,3 +61,8 @@ setsockopt(sock_fd, IPPROTO_TCP, TCP_NODELAY, (char *)&value,sizeof(int));
 ```
 
 另外，网上有些文章说 TCP_CORK 的 socket option 是也关闭 Nagle 算法，这个还不够准确。TCP_CORK 是禁止小包发送，而Nagle算法没有禁止小包发送，只是禁止了大量的小包发送。最好不要两个选项都设置。 老实说，我觉得 Nagle 算法其实只加了个延时，没有别的什么，我觉得最好还是把他关闭，然后由自己的应用层来控制数据，我个人觉得不应该什么事都去依赖内核算法。
+
+## Refer
+整理自：
+* [TCP 的那些事儿（上）](https://coolshell.cn/articles/11564.html)
+* [TCP 的那些事儿（下](https://coolshell.cn/articles/11609.html)
