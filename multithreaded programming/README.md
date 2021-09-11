@@ -1,4 +1,4 @@
-#### 多线程编程学习
+## 多线程编程学习
 
 [POSIX 多线程基础（一）](https://github.com/AngryHacker/ocean/blob/master/multithreaded%20programming/posix_thread_basic_01.md)
 
@@ -14,7 +14,7 @@
 
 [POSIX 多线程编程实例](https://github.com/AngryHacker/ocean/blob/master/multithreaded%20programming/pthread_examples.md)
 
-##### 其他资料
+### 其他资料
 [POSIX Threads Programming](https://computing.llnl.gov/tutorials/pthreads/)
 
 [POSIX thread (pthread) libraries](http://www.cs.cmu.edu/afs/cs/academic/class/15492-f07/www/pthreads.html)
